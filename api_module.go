@@ -9,6 +9,11 @@ import (
 
 type APIModule struct {
 	Mux    *mux.Router
+	ContextPath string
+}
+
+func (s *APIModule) SetContextPath(contextPath string){
+	s.ContextPath = contextPath
 }
 
 func (s *APIModule) DecodeRequest(r *http.Request, v interface{}) error {
