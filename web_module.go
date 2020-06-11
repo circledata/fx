@@ -10,11 +10,13 @@ import (
 
 	//"github.com/rivo/sessions"
 	"github.com/gorilla/mux"
+	"time"
 )
 
 type WebModule struct {
 	Mux    *mux.Router
 	sessionCookieName string
+	sessionExpiry time.Duration
 }
 /*
 func (m *WebModule) InitializeUserSession() error {
