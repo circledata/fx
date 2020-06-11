@@ -22,6 +22,12 @@ func NewServer(options ...ServerOption) (*BaseTwoServer, error) {
 		}
 	}
 
+	validationError := server.validateOptions()
+
+	if validationError != nil {
+		return nil, validationError
+	}
+
 	return server, nil
 }
 
@@ -71,6 +77,15 @@ type BaseTwoServer struct {
 	writeTimeout  time.Duration
 	idleTimeout   time.Duration
 	tlsConfig     *tls.Config
+}
+
+func (s *BaseTwoServer) validateOptions() error {
+
+	if s.logger == nil {
+		return errors.New("server logger has not been set")
+	}
+
+	return nil
 }
 
 func (s *BaseTwoServer) GetMux() *mux.Router {
