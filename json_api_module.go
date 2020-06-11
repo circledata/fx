@@ -7,20 +7,20 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type APIModule struct {
+type JSONAPIModule struct {
 	Mux    *mux.Router
 	ContextPath string
 }
 
-func (s *APIModule) SetContextPath(contextPath string){
+func (s *JSONAPIModule) SetContextPath(contextPath string){
 	s.ContextPath = contextPath
 }
 
-func (s *APIModule) DecodeRequest(r *http.Request, v interface{}) error {
+func (s *JSONAPIModule) DecodeRequest(r *http.Request, v interface{}) error {
 	return json.NewDecoder(r.Body).Decode(v)
 }
 
-func (s *APIModule) EncodeResponse(w http.ResponseWriter, status int, data interface{}) error {
+func (s *JSONAPIModule) EncodeResponse(w http.ResponseWriter, status int, data interface{}) error {
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(status)
@@ -38,6 +38,6 @@ func (s *APIModule) EncodeResponse(w http.ResponseWriter, status int, data inter
 	return nil
 }
 
-func (m *APIModule) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (m *JSONAPIModule) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	m.Mux.ServeHTTP(w, r)
 }
