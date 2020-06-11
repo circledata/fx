@@ -12,8 +12,8 @@ import (
 
 func NewServer(options ...ServerOption) (*BaseTwoServer, error) {
 	server := &BaseTwoServer{
-		mux: mux.NewRouter().StrictSlash(true),
-		serverAddress: ":9999",
+		mux:           mux.NewRouter().StrictSlash(true),
+		serverAddress: ":8888",
 	}
 
 	if len(options) > 0 {
@@ -27,50 +27,50 @@ func NewServer(options ...ServerOption) (*BaseTwoServer, error) {
 
 type ServerOption func(*BaseTwoServer)
 
-func SetAddress(addr string) ServerOption{
-	return func(server *BaseTwoServer){
+func SetAddress(addr string) ServerOption {
+	return func(server *BaseTwoServer) {
 		server.serverAddress = addr
 	}
 }
 
-func SetLogger(logger Logger) ServerOption{
-	return func(server *BaseTwoServer){
+func SetLogger(logger Logger) ServerOption {
+	return func(server *BaseTwoServer) {
 		server.logger = logger
 	}
 }
 
-func SetReadTimeout(readTimeout time.Duration) ServerOption{
-	return func(server *BaseTwoServer){
+func SetReadTimeout(readTimeout time.Duration) ServerOption {
+	return func(server *BaseTwoServer) {
 		server.readTimeout = readTimeout
 	}
 }
 
-func SetWriteTimeout(writeTimeout time.Duration) ServerOption{
-	return func(server *BaseTwoServer){
+func SetWriteTimeout(writeTimeout time.Duration) ServerOption {
+	return func(server *BaseTwoServer) {
 		server.writeTimeout = writeTimeout
 	}
 }
 
-func SetIdleTimeout(idleTimeout time.Duration) ServerOption{
-	return func(server *BaseTwoServer){
+func SetIdleTimeout(idleTimeout time.Duration) ServerOption {
+	return func(server *BaseTwoServer) {
 		server.idleTimeout = idleTimeout
 	}
 }
 
-func SetTLSConfig(tlsConfig *tls.Config) ServerOption{
-	return func(server *BaseTwoServer){
+func SetTLSConfig(tlsConfig *tls.Config) ServerOption {
+	return func(server *BaseTwoServer) {
 		server.tlsConfig = tlsConfig
 	}
 }
 
 type BaseTwoServer struct {
-	mux *mux.Router
+	mux           *mux.Router
 	serverAddress string
-	logger Logger
-	readTimeout time.Duration
-	writeTimeout time.Duration
-	idleTimeout time.Duration
-	tlsConfig    *tls.Config
+	logger        Logger
+	readTimeout   time.Duration
+	writeTimeout  time.Duration
+	idleTimeout   time.Duration
+	tlsConfig     *tls.Config
 }
 
 func (s *BaseTwoServer) GetMux() *mux.Router {
@@ -119,16 +119,14 @@ func (s *BaseTwoServer) HandlePanic(h http.Handler) http.Handler {
 
 func (s *BaseTwoServer) Run() {
 	srv := &http.Server{
-		Addr: s.serverAddress,
+		Addr:         s.serverAddress,
 		ReadTimeout:  s.readTimeout,
 		WriteTimeout: s.writeTimeout,
-		IdleTimeout: s.idleTimeout,
+		IdleTimeout:  s.idleTimeout,
 		TLSConfig:    s.tlsConfig,
-		Handler: http.TimeoutHandler(s.HandlePanic(s.mux), 1*time.Minute, "Service unavailable. Request timeout"),
+		Handler:      http.TimeoutHandler(s.HandlePanic(s.mux), 1*time.Minute, "Service unavailable. Request timeout"),
 	}
 
-	log.Println("Vite Server is now running on " + s.serverAddress)
+	log.Println("Server is now running on " + s.serverAddress)
 	log.Println(srv.ListenAndServe())
 }
-
-
