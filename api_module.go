@@ -20,7 +20,7 @@ func (s *APIModule) DecodeRequest(r *http.Request, v interface{}) error {
 	return json.NewDecoder(r.Body).Decode(v)
 }
 
-func (s *APIModule) EncodeResponse(w http.ResponseWriter, r *http.Request, status int, data interface{}) error {
+func (s *APIModule) EncodeResponse(w http.ResponseWriter, status int, data interface{}) error {
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(status)
