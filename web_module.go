@@ -1,29 +1,30 @@
 package fx
 
 import (
-	//"encoding/gob"
-	//"errors"
-	//"fmt"
-	//"html/template"
-	//"net/http"
-	//"time"
-
-	//"github.com/rivo/sessions"
-	"github.com/gorilla/mux"
+	"errors"
+	"html/template"
+	"net/http"
 	"time"
+
+	"github.com/rivo/sessions"
+	"github.com/gorilla/mux"
 )
+
+type WebUser struct {
+	sessions.User
+}
 
 type WebModule struct {
 	Mux    *mux.Router
 	sessionCookieName string
 	sessionExpiry time.Duration
 }
-/*
-func (m *WebModule) InitializeUserSession() error {
+
+func (m *WebModule) InitializeUserSession(userProviderFunc func(id interface{}) (sessions.User, error)) error {
 
 	sessionCookieName := "fx"
 
-	if m.sessionCookieName != nil {
+	if m.sessionCookieName != "" {
 		sessionCookieName = m.sessionCookieName
 	}
 
@@ -50,36 +51,12 @@ func (m *WebModule) InitializeUserSession() error {
 		return errors.New("error initializing session persistence: persistence is not of type ExtendablePersistenceLayer")
 	}
 
-	persistence.LoadUserFunc = func(id interface{}) (sessions.User, error) {
-		userID, ok := id.(int64)
-
-		if !ok {
-			return nil, fmt.Errorf("invalid User ID: %#v", id)
-		}
-
-		userService, userServiceError := m.App.GetUserService()
-
-		if userServiceError != nil {
-			return nil, userServiceError
-		}
-
-		user, userError := userService.FindByID(userID)
-
-		if userError != nil {
-			return nil, userError
-		}
-
-		return user, nil
-	}
+	persistence.LoadUserFunc = userProviderFunc
 
 	return nil
 }
 
-func (m *WebModule) RegisterSessionSerialization() {
-	gob.Register(&entities.User{})
-}
-
-func (m *WebModule) StartUserSession(w http.ResponseWriter, r *http.Request, user *entities.User) error {
+func (m *WebModule) StartUserSession(w http.ResponseWriter, r *http.Request, user *WebUser) error {
 	session, sessionError := sessions.Start(w, r, true)
 
 	if sessionError != nil {
@@ -122,7 +99,7 @@ func (m *WebModule) EndUserSession(w http.ResponseWriter, r *http.Request) error
 	return nil
 }
 
-func (m *WebModule) GetLoggedInUser(w http.ResponseWriter, r *http.Request) (*entities.User, error) {
+func (m *WebModule) GetLoggedInUser(w http.ResponseWriter, r *http.Request) (*WebUser, error) {
 	session, sessionError := sessions.Start(w, r, false)
 
 	if sessionError != nil {
@@ -133,28 +110,26 @@ func (m *WebModule) GetLoggedInUser(w http.ResponseWriter, r *http.Request) (*en
 		return nil, nil
 	}
 
-	sessionUser := session.User()
+	sessionUser := session.User().(*WebUser)
 
 	if session == nil || sessionUser == nil {
 		return nil, nil
 	}
 
-	user, userOk := sessionUser.(*entities.User)
-
-	if !userOk {
-		return nil, errors.New("Invalid session user")
-	}
-
-	return user, nil
+	return sessionUser, nil
 }
 
 func (m *WebModule) GetViewsDirectory() string {
 	return ""
 }
 
+func (m *WebModule) GetContextPath() string {
+	return ""
+}
+
 /// Views
 type ViewData struct {
-	LoggedInUser       *entities.User
+	LoggedInUser       *WebUser
 	SystemDate         time.Time
 	PageInfoMessage    string
 	PageSuccessMessage string
@@ -198,7 +173,7 @@ func (v *LayoutView) Render(w http.ResponseWriter, r *http.Request, data interfa
 		pageErrorMessage = ""
 	}
 
-	loggedInUser := session.User().(*entities.User)
+	loggedInUser := session.User().(*WebUser)
 
 	return v.Template.ExecuteTemplate(w, "layout", ViewData{
 		SystemDate:       time.Now(),
@@ -211,13 +186,14 @@ func (v *LayoutView) Render(w http.ResponseWriter, r *http.Request, data interfa
 	})
 }
 
-type SingleView struct {
+type SimpleView struct {
 	Template *template.Template
 }
 
-func (v *SingleView) Render(w http.ResponseWriter, r *http.Request, data interface{}) error {
+func (v *SimpleView) Render(w http.ResponseWriter, r *http.Request, data interface{}) error {
 	return v.Template.ExecuteTemplate(w, "page", ViewData{
 		SystemDate:       time.Now(),
 		Data: data,
 	})
-}*/
+}
+

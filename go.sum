@@ -1,2 +1,4 @@
 github.com/gorilla/mux v1.7.4 h1:VuZ8uybHlWmqV03+zRzdwKL4tUnIp1MAQtp1mIFE1bc=
 github.com/gorilla/mux v1.7.4/go.mod h1:DVbg23sWSpFRCP0SfiEN6jmj59UnW/n46BH5rLB71So=
+github.com/rivo/sessions v0.0.0-20180420064926-e18b9ef80f84 h1:HdzLpTLKlLnI6nHhP0IaQ5QSKVc334XGnfq47jRJTYU=
+github.com/rivo/sessions v0.0.0-20180420064926-e18b9ef80f84/go.mod h1:n6ZMojksUYneyVWxa18fHP80qrg4aut0lHcSPDtuEUo=
