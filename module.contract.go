@@ -6,5 +6,6 @@ import (
 
 type ServerModule interface {
 	SetContextPath(contextPath string)
+	GetContextPath() string
 	Initialize(*mux.Router) error
 }

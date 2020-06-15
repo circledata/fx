@@ -129,6 +129,7 @@ func (m *WebModule) GetContextPath() string {
 
 /// Views
 type ViewData struct {
+	ContextPath string
 	LoggedInUser       *WebUser
 	SystemDate         time.Time
 	PageInfoMessage    string
@@ -140,6 +141,7 @@ type ViewData struct {
 
 type LayoutView struct {
 	Template *template.Template
+	ServerModule       ServerModule
 }
 
 func (v *LayoutView) Render(w http.ResponseWriter, r *http.Request, data interface{}) error {
@@ -176,6 +178,7 @@ func (v *LayoutView) Render(w http.ResponseWriter, r *http.Request, data interfa
 	loggedInUser := session.User().(*WebUser)
 
 	return v.Template.ExecuteTemplate(w, "layout", ViewData{
+		ContextPath:       v.ServerModule.GetContextPath(),
 		SystemDate:       time.Now(),
 		LoggedInUser:       loggedInUser,
 		PageInfoMessage:    pageInfoMessage.(string),
@@ -190,7 +193,7 @@ type SimpleView struct {
 	Template *template.Template
 }
 
-func (v *SimpleView) Render(w http.ResponseWriter, r *http.Request, data interface{}) error {
+func (v *SimpleView) Render(w http.ResponseWriter, data interface{}) error {
 	return v.Template.ExecuteTemplate(w, "page", ViewData{
 		SystemDate:       time.Now(),
 		Data: data,
