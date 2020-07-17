@@ -10,17 +10,30 @@ import (
 type JSONAPIModule struct {
 	Mux    *mux.Router
 	ContextPath string
+	Logger Logger
 }
 
-func (s *JSONAPIModule) SetContextPath(contextPath string){
-	s.ContextPath = contextPath
+func (m *JSONAPIModule) SetContextPath(contextPath string){
+	m.ContextPath = contextPath
 }
 
-func (s *JSONAPIModule) DecodeRequest(r *http.Request, v interface{}) error {
+func (m *JSONAPIModule) GetContextPath() string{
+	return m.ContextPath
+}
+
+func (m *JSONAPIModule) DecodeRequest(r *http.Request, v interface{}) error {
 	return json.NewDecoder(r.Body).Decode(v)
 }
 
-func (s *JSONAPIModule) EncodeResponse(w http.ResponseWriter, status int, data interface{}) error {
+func (m *JSONAPIModule) SetLogger(logger Logger){
+	m.Logger = logger
+}
+
+func (m *JSONAPIModule) GetLogger() Logger {
+	return m.Logger
+}
+
+func (m *JSONAPIModule) EncodeResponse(w http.ResponseWriter, status int, data interface{}) error {
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(status)

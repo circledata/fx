@@ -24,11 +24,28 @@ type SessionUserProviderFunc func(id interface{}) (*WebUser, error)
 
 type WebModule struct {
 	Mux    *mux.Router
+	contextPath string
+	logger Logger
 	sessionCookieName string
 	sessionExpiry time.Duration
-	contextPath string
 	viewsPath string
 	assetsPath string
+}
+
+func (m *WebModule) SetContextPath(contextPath string){
+	m.contextPath = contextPath
+}
+
+func (m *WebModule) GetContextPath() string{
+	return m.contextPath
+}
+
+func (m *WebModule) SetLogger(logger Logger){
+	m.logger = logger
+}
+
+func (m *WebModule) GetLogger() Logger {
+	return m.logger
 }
 
 func (m *WebModule) InitializeUserSession(userProviderFunc SessionUserProviderFunc) error {
@@ -138,10 +155,6 @@ func (m *WebModule) GetLoggedInUser(w http.ResponseWriter, r *http.Request) (*We
 	}
 
 	return sessionUser, nil
-}
-
-func (m *WebModule) GetContextPath() string {
-	return m.contextPath
 }
 
 func (m *WebModule) GetViewsPath() string {
