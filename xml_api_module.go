@@ -35,7 +35,7 @@ func (m *XMLAPIModule) GetLogger() Logger {
 
 func (m *XMLAPIModule) EncodeResponse(w http.ResponseWriter, status int, data interface{}) error {
 
-	w.Header().Set("Content-Type", "application/xml; charset=utf-8")
+	w.Header().Set("Content-Type", "application/xml")
 	w.WriteHeader(status)
 
 	if data == nil {
