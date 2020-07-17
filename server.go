@@ -96,6 +96,7 @@ func (s *BaseTwoServer) RegisterModule(contextPath string, module ServerModule) 
 	router := s.mux.PathPrefix(contextPath).Subrouter().StrictSlash(true)
 
 	module.SetContextPath(contextPath)
+	module.SetLogger(s.logger)
 
 	moduleInitError := module.Initialize(router)
 
