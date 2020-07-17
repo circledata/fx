@@ -11,16 +11,27 @@ import (
 )
 
 type WebUser struct {
-	sessions.User
+	ID interface{}
+	FullName string
+	Username string
 }
+
+func (user *WebUser) GetID() interface{} {
+	return user.ID
+}
+
+type SessionUserProviderFunc func(id interface{}) (*WebUser, error)
 
 type WebModule struct {
 	Mux    *mux.Router
 	sessionCookieName string
 	sessionExpiry time.Duration
+	contextPath string
+	viewsPath string
+	assetsPath string
 }
 
-func (m *WebModule) InitializeUserSession(userProviderFunc func(id interface{}) (sessions.User, error)) error {
+func (m *WebModule) InitializeUserSession(userProviderFunc SessionUserProviderFunc) error {
 
 	sessionCookieName := "fx"
 
@@ -48,10 +59,20 @@ func (m *WebModule) InitializeUserSession(userProviderFunc func(id interface{}) 
 	persistence, persistenceOK := sessions.Persistence.(sessions.ExtendablePersistenceLayer)
 
 	if !persistenceOK {
-		return errors.New("error initializing session persistence: persistence is not of type ExtendablePersistenceLayer")
+		return errors.New("error initializing session persistence: persistence is not of type sessions.ExtendablePersistenceLayer")
 	}
 
-	persistence.LoadUserFunc = userProviderFunc
+	persistence.LoadUserFunc = func(id interface{}) (sessions.User, error) {
+		webUser, webUserErr := userProviderFunc(id)
+
+		if webUserErr != nil {
+			return nil, webUserErr
+		}
+
+		user := sessions.User(webUser)
+
+		return user, nil
+	}
 
 	return nil
 }
@@ -119,17 +140,23 @@ func (m *WebModule) GetLoggedInUser(w http.ResponseWriter, r *http.Request) (*We
 	return sessionUser, nil
 }
 
-func (m *WebModule) GetViewsDirectory() string {
-	return ""
+func (m *WebModule) GetContextPath() string {
+	return m.contextPath
 }
 
-func (m *WebModule) GetContextPath() string {
-	return ""
+func (m *WebModule) GetViewsPath() string {
+	return m.viewsPath
+}
+
+func (m *WebModule) GetAssetsPath() string {
+	return m.assetsPath
 }
 
 /// Views
 type ViewData struct {
 	ContextPath string
+	AssetsPath string
+	ViewsPath string
 	LoggedInUser       *WebUser
 	SystemDate         time.Time
 	PageInfoMessage    string
@@ -141,7 +168,7 @@ type ViewData struct {
 
 type LayoutView struct {
 	Template *template.Template
-	ServerModule       ServerModule
+	Module       WebModule
 }
 
 func (v *LayoutView) Render(w http.ResponseWriter, r *http.Request, data interface{}) error {
@@ -178,7 +205,9 @@ func (v *LayoutView) Render(w http.ResponseWriter, r *http.Request, data interfa
 	loggedInUser := session.User().(*WebUser)
 
 	return v.Template.ExecuteTemplate(w, "layout", ViewData{
-		ContextPath:       v.ServerModule.GetContextPath(),
+		ContextPath:       v.Module.GetContextPath(),
+		AssetsPath:       v.Module.GetAssetsPath(),
+		ViewsPath:       v.Module.GetViewsPath(),
 		SystemDate:       time.Now(),
 		LoggedInUser:       loggedInUser,
 		PageInfoMessage:    pageInfoMessage.(string),
